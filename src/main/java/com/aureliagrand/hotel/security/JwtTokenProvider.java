@@ -20,7 +20,7 @@ public class JwtTokenProvider {
     private final long expirationTime;
 
     public JwtTokenProvider(
-            @Value("${jwt.secret:aurelia-grand-luxury-hotel-jwt-super-secure-secret-key-2026-minimum-256-bits-long}") String secret,
+           @Value("${jwt.secret}") String secret,
             @Value("${jwt.expiration:86400000}") long expirationTime) {
         byte[] keyBytes = secret.getBytes(StandardCharsets.UTF_8);
         if (keyBytes.length < 32) {
