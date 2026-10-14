@@ -44,7 +44,7 @@ public class SecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 // Public Authentication and Health endpoints
-                .requestMatchers("/api/auth/login", "/api/auth/register", "/api/auth/logout", "/api/health", "/api/auth/health").permitAll()
+                .requestMatchers("/api/auth/login", "/api/auth/register", "/api/auth/register/**", "/api/auth/logout", "/api/health", "/api/auth/health").permitAll()
                 
                 // Swagger & OpenAPI documentation endpoints
                 .requestMatchers(

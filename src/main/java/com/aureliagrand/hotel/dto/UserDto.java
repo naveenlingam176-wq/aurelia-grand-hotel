@@ -34,6 +34,12 @@ public class UserDto {
     @Schema(description = "Account active state indicator", example = "true")
     private Boolean active;
 
+    @Schema(description = "Account approval status", example = "APPROVED", allowableValues = {"PENDING", "APPROVED", "REJECTED"})
+    private String status;
+
+    @Schema(description = "Account registration timestamp")
+    private java.time.LocalDateTime createdAt;
+
     public UserDto() {
     }
 
@@ -48,6 +54,8 @@ public class UserDto {
             this.country = user.getCountry();
             this.currency = user.getCurrency();
             this.active = user.getActive();
+            this.status = user.getStatus() != null ? user.getStatus().name() : "APPROVED";
+            this.createdAt = user.getCreatedAt();
         }
     }
 
@@ -123,5 +131,21 @@ public class UserDto {
 
     public void setActive(Boolean active) {
         this.active = active;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public java.time.LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(java.time.LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 }

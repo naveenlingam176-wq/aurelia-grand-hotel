@@ -1037,7 +1037,7 @@ let categoryChart = null;
 
 const API_BASE_URL = (typeof window !== 'undefined' && window.__API_BASE_URL__)
   ? window.__API_BASE_URL__
-  : ((typeof window !== 'undefined' && window.location && window.location.port === '8080')
+  : ((typeof window !== 'undefined' && window.location && window.location.origin && window.location.origin !== 'null' && !window.location.origin.startsWith('file:'))
       ? window.location.origin
       : 'http://localhost:8080');
 
@@ -1142,12 +1142,20 @@ function setLoginMode(mode) {
   const guestStaffLink = document.getElementById('guestStaffAccessLink');
   const adminReturnLink = document.getElementById('adminReturnGuestLink');
   const authTitle = document.getElementById('authModeTitle');
+  const authModeBadgeText = document.getElementById('authModeBadgeText');
+  const authModeIcon = document.getElementById('authModeIcon');
+  const authWelcomeTitle = document.getElementById('authWelcomeTitle');
+  const authWelcomeSub = document.getElementById('authWelcomeSub');
   const emailInput = document.getElementById('loginEmail');
   const passInput = document.getElementById('loginPassword');
+  const emailLabel = document.getElementById('loginEmailLabel');
   const chipAdmin = document.getElementById('chipAdmin');
   const chipStaff = document.getElementById('chipStaff');
   const chipUser = document.getElementById('chipUser');
   const btnText = document.getElementById('loginBtnText');
+
+  // Reset errors on mode change
+  clearAuthErrors();
 
   // Remove active state from all chips
   [chipAdmin, chipStaff, chipUser].forEach(chip => {
@@ -1164,38 +1172,98 @@ function setLoginMode(mode) {
     if (adminReturnLink) adminReturnLink.style.display = 'none';
     if (chipUser) chipUser.classList.add('active');
     if (authTitle) authTitle.textContent = 'GUEST LOGIN';
-    if (emailInput) emailInput.placeholder = 'Enter your email';
+    if (authModeBadgeText) authModeBadgeText.textContent = 'Guest Portal Access';
+    if (authModeIcon) authModeIcon.className = 'fa-solid fa-compass';
+    if (authWelcomeTitle) authWelcomeTitle.textContent = 'Welcome Back';
+    if (authWelcomeSub) authWelcomeSub.textContent = 'Sign in to access your luxury suites, bookings, and reservations.';
+    if (emailLabel) emailLabel.textContent = 'Guest Email Address';
+    if (emailInput) emailInput.placeholder = 'e.g. guest@aureliagrand.com';
     if (passInput) passInput.placeholder = 'Enter your password';
-    if (btnText) btnText.innerHTML = '<i class="fa-solid fa-arrow-right-to-bracket"></i> Sign In';
+    if (btnText) btnText.innerHTML = '<i class="fa-solid fa-arrow-right-to-bracket"></i> Sign In as Guest';
   } else if (mode === 'admin') {
     currentLoginMode = 'admin';
     if (authContainer) authContainer.classList.add('mode-admin-staff');
     if (adminStaffBar) adminStaffBar.style.display = 'block';
-    if (guestBrandBlock) guestBrandBlock.style.display = 'none';
-    if (guestWelcomeBlock) guestWelcomeBlock.style.display = 'none';
+    if (guestBrandBlock) guestBrandBlock.style.display = 'block';
+    if (guestWelcomeBlock) guestWelcomeBlock.style.display = 'block';
     if (guestStaffLink) guestStaffLink.style.display = 'none';
     if (adminReturnLink) adminReturnLink.style.display = 'block';
     if (chipAdmin) chipAdmin.classList.add('active');
     if (authTitle) authTitle.textContent = 'ADMIN LOGIN';
+    if (authModeBadgeText) authModeBadgeText.textContent = 'Executive Administrator Access';
+    if (authModeIcon) authModeIcon.className = 'fa-solid fa-shield-halved';
+    if (authWelcomeTitle) authWelcomeTitle.textContent = 'Executive Portal';
+    if (authWelcomeSub) authWelcomeSub.textContent = 'Sign in with your administrative security credentials to manage the resort.';
+    if (emailLabel) emailLabel.textContent = 'Executive Email Address';
     if (emailInput) emailInput.placeholder = 'e.g. admin@aureliagrand.com';
-    if (passInput) passInput.placeholder = 'Enter your security access key...';
-    if (btnText) btnText.innerHTML = '<i class="fa-solid fa-door-open"></i> Sign In to Hotel Portal';
+    if (passInput) passInput.placeholder = 'Enter executive security access key...';
+    if (btnText) btnText.innerHTML = '<i class="fa-solid fa-shield-halved"></i> Sign In to Admin Portal';
   } else if (mode === 'staff') {
     currentLoginMode = 'staff';
     if (authContainer) authContainer.classList.add('mode-admin-staff');
     if (adminStaffBar) adminStaffBar.style.display = 'block';
-    if (guestBrandBlock) guestBrandBlock.style.display = 'none';
-    if (guestWelcomeBlock) guestWelcomeBlock.style.display = 'none';
+    if (guestBrandBlock) guestBrandBlock.style.display = 'block';
+    if (guestWelcomeBlock) guestWelcomeBlock.style.display = 'block';
     if (guestStaffLink) guestStaffLink.style.display = 'none';
     if (adminReturnLink) adminReturnLink.style.display = 'block';
     if (chipStaff) chipStaff.classList.add('active');
     if (authTitle) authTitle.textContent = 'STAFF LOGIN';
+    if (authModeBadgeText) authModeBadgeText.textContent = 'Hotel Staff Portal';
+    if (authModeIcon) authModeIcon.className = 'fa-solid fa-id-badge';
+    if (authWelcomeTitle) authWelcomeTitle.textContent = 'Staff Operations Access';
+    if (authWelcomeSub) authWelcomeSub.textContent = 'Sign in to access concierge, inventory, and operations management.';
+    if (emailLabel) emailLabel.textContent = 'Staff Email Address';
     if (emailInput) emailInput.placeholder = 'e.g. staff@aureliagrand.com';
-    if (passInput) passInput.placeholder = 'Enter your security access key...';
-    if (btnText) btnText.innerHTML = '<i class="fa-solid fa-door-open"></i> Sign In to Hotel Portal';
+    if (passInput) passInput.placeholder = 'Enter staff security access key...';
+    if (btnText) btnText.innerHTML = '<i class="fa-solid fa-id-badge"></i> Sign In to Staff Portal';
   }
 }
 window.setLoginMode = setLoginMode;
+
+// --- AUTH PANE SWITCHER (Login, Guest Register, Staff Register) ---
+function switchAuthPane(paneName) {
+  const loginPane = document.getElementById('loginPaneSection');
+  const guestRegPane = document.getElementById('guestRegisterPaneSection');
+  const staffRegPane = document.getElementById('staffRegisterPaneSection');
+  const roleSelectorBar = document.getElementById('authRoleSelectorBar');
+
+  clearAuthErrors();
+
+  if (paneName === 'guest-register') {
+    if (loginPane) loginPane.style.display = 'none';
+    if (guestRegPane) guestRegPane.style.display = 'block';
+    if (staffRegPane) staffRegPane.style.display = 'none';
+    if (roleSelectorBar) roleSelectorBar.style.display = 'none';
+  } else if (paneName === 'staff-register') {
+    if (loginPane) loginPane.style.display = 'none';
+    if (guestRegPane) guestRegPane.style.display = 'none';
+    if (staffRegPane) staffRegPane.style.display = 'block';
+    if (roleSelectorBar) roleSelectorBar.style.display = 'none';
+  } else {
+    // Default: 'login'
+    if (loginPane) loginPane.style.display = 'block';
+    if (guestRegPane) guestRegPane.style.display = 'none';
+    if (staffRegPane) staffRegPane.style.display = 'none';
+    if (roleSelectorBar) roleSelectorBar.style.display = 'flex';
+  }
+  soundEngine.playChime('bell');
+}
+window.switchAuthPane = switchAuthPane;
+
+// --- PASSWORD VISIBILITY TOGGLE ---
+function togglePasswordVisibility(inputId, btnEl) {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+  const isPassword = input.type === 'password';
+  input.type = isPassword ? 'text' : 'password';
+  if (btnEl) {
+    const icon = btnEl.querySelector('i');
+    if (icon) {
+      icon.className = isPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye';
+    }
+  }
+}
+window.togglePasswordVisibility = togglePasswordVisibility;
 
 // Global helper for quick test credentials
 window.fillCredentials = function(role) {
@@ -1342,16 +1410,45 @@ function clearAuthErrors() {
   if (alertBanner) alertBanner.style.display = 'none';
   if (emailWrapper) emailWrapper.classList.remove('input-error');
   if (passWrapper) passWrapper.classList.remove('input-error');
-}
 
-function showAuthAlert(message) {
+  // Clear guest registration errors
+  ['guestRegName', 'guestRegEmail', 'guestRegPhone', 'guestRegPassword', 'guestRegConfirmPassword'].forEach(id => {
+    document.getElementById(id + 'ErrorMsg')?.classList.remove('visible');
+    document.getElementById(id + 'Wrapper')?.classList.remove('input-error');
+  });
+
+  // Clear staff registration errors
+  ['staffRegName', 'staffRegEmail', 'staffRegPhone', 'staffRegPassword', 'staffRegConfirmPassword'].forEach(id => {
+    document.getElementById(id + 'ErrorMsg')?.classList.remove('visible');
+    document.getElementById(id + 'Wrapper')?.classList.remove('input-error');
+  });
+}
+window.clearAuthErrors = clearAuthErrors;
+
+function showAuthAlert(message, type = 'error') {
   const banner = document.getElementById('authAlertBanner');
   const text = document.getElementById('authAlertText');
+  const icon = document.getElementById('authAlertIcon');
   if (banner && text) {
     text.textContent = message;
     banner.style.display = 'flex';
+    banner.className = 'auth-alert-banner';
+
+    if (type === 'warning' || (typeof message === 'string' && message.includes('PENDING'))) {
+      banner.classList.add('alert-warning');
+      if (icon) icon.className = 'fa-solid fa-clock-rotate-left auth-alert-icon';
+    } else if (type === 'success' || (typeof message === 'string' && message.includes('success'))) {
+      banner.classList.add('alert-success');
+      if (icon) icon.className = 'fa-solid fa-circle-check auth-alert-icon';
+    } else if (type === 'rejected' || (typeof message === 'string' && message.includes('REJECTED'))) {
+      banner.classList.add('alert-rejected');
+      if (icon) icon.className = 'fa-solid fa-ban auth-alert-icon';
+    } else {
+      if (icon) icon.className = 'fa-solid fa-circle-exclamation auth-alert-icon';
+    }
   }
 }
+window.showAuthAlert = showAuthAlert;
 
 function updateProfileDisplay(user) {
   if (!user) return;
@@ -1644,6 +1741,13 @@ function applyRoleBasedAccess(role) {
     if (typeof runAdminSearch === 'function') runAdminSearch();
     if (typeof updateDashboardKPIs === 'function') updateDashboardKPIs();
 
+    // Staff Approvals section: Visible EXCLUSIVELY for Admin
+    const navStaffApprovals = document.getElementById('navStaffApprovals');
+    const tabBtnStaffApprovals = document.getElementById('tabBtnStaffApprovals');
+    if (navStaffApprovals) navStaffApprovals.style.display = 'flex';
+    if (tabBtnStaffApprovals) tabBtnStaffApprovals.style.display = 'inline-flex';
+    if (typeof loadStaffApplications === 'function') loadStaffApplications();
+
   } else if (normRole === 'STAFF') {
     // Staff has hotel operations access; Financial analytics tab is restricted
     if (analyticsNav) analyticsNav.style.display = 'none';
@@ -1696,6 +1800,17 @@ function applyRoleBasedAccess(role) {
     if (typeof runStaffSearch === 'function') runStaffSearch();
     if (typeof updateDashboardKPIs === 'function') updateDashboardKPIs();
 
+    // Staff Approvals section: Strictly hidden for Staff
+    const navStaffApprovals = document.getElementById('navStaffApprovals');
+    const tabBtnStaffApprovals = document.getElementById('tabBtnStaffApprovals');
+    if (navStaffApprovals) navStaffApprovals.style.display = 'none';
+    if (tabBtnStaffApprovals) tabBtnStaffApprovals.style.display = 'none';
+    if (document.querySelector('.tab-pane#tabStaffApprovals.active')) {
+      document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+      const rmPane = document.getElementById('tabRooms');
+      if (rmPane) rmPane.classList.add('active');
+    }
+
   } else {
     // GUEST (User/Guest) has access to Portfolio Showcase, Suites, Party Halls, Bookings, Favorites, Concierge
     if (analyticsNav) analyticsNav.style.display = 'none';
@@ -1745,6 +1860,17 @@ function applyRoleBasedAccess(role) {
     if (typeof updateFavoritesBadges === 'function') updateFavoritesBadges();
     if (typeof renderFavoritesGrid === 'function') renderFavoritesGrid();
     if (typeof updateGuestDashboardUI === 'function') updateGuestDashboardUI();
+
+    // Staff Approvals section: Strictly hidden for Guest
+    const navStaffApprovals = document.getElementById('navStaffApprovals');
+    const tabBtnStaffApprovals = document.getElementById('tabBtnStaffApprovals');
+    if (navStaffApprovals) navStaffApprovals.style.display = 'none';
+    if (tabBtnStaffApprovals) tabBtnStaffApprovals.style.display = 'none';
+    if (document.querySelector('.tab-pane#tabStaffApprovals.active')) {
+      document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+      const ovPane = document.getElementById('tabOverview');
+      if (ovPane) ovPane.classList.add('active');
+    }
   }
 
   // Update navigation count badge
@@ -2066,7 +2192,10 @@ function initAuthUI() {
           body: JSON.stringify({ email, password })
         });
 
-        const data = await response.json();
+        let data = {};
+        try {
+          data = await response.json();
+        } catch (_) {}
 
         if (response.ok && data.success && data.token && data.user) {
           if (data.user.role === 'USER' || data.user.role === 'GUEST') {
@@ -2077,7 +2206,14 @@ function initAuthUI() {
           showToast('Security Clearance Verified', `Welcome to Aurelia Grand, ${data.user.fullName}`, 'success');
           showDashboardView(data.user);
         } else {
-          showAuthAlert(data.message || 'Invalid email or password');
+          const msg = data.message || 'Invalid email or password';
+          let alertType = 'error';
+          if (msg.includes('PENDING')) {
+            alertType = 'warning';
+          } else if (msg.includes('REJECTED')) {
+            alertType = 'rejected';
+          }
+          showAuthAlert(msg, alertType);
           soundEngine.playChime('bell');
         }
       } catch (err) {
@@ -2110,7 +2246,563 @@ function initAuthUI() {
       }
     });
   }
+
+  // 7. Guest Registration Form Submission
+  const guestRegForm = document.getElementById('guestRegisterForm');
+  if (guestRegForm) {
+    ['guestRegName', 'guestRegEmail', 'guestRegPhone', 'guestRegPassword', 'guestRegConfirmPassword'].forEach(id => {
+      document.getElementById(id)?.addEventListener('input', () => {
+        document.getElementById(id + 'ErrorMsg')?.classList.remove('visible');
+        document.getElementById(id + 'Wrapper')?.classList.remove('input-error');
+        document.getElementById('authAlertBanner').style.display = 'none';
+      });
+    });
+
+    let isGuestSubmitting = false;
+    guestRegForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (isGuestSubmitting) return;
+      clearAuthErrors();
+
+      const name = document.getElementById('guestRegName')?.value.trim();
+      const email = document.getElementById('guestRegEmail')?.value.trim();
+      const phone = document.getElementById('guestRegPhone')?.value.trim();
+      const password = document.getElementById('guestRegPassword')?.value;
+      const confirmPassword = document.getElementById('guestRegConfirmPassword')?.value;
+
+      let hasError = false;
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+      if (!name) {
+        document.getElementById('guestRegNameErrorMsg')?.classList.add('visible');
+        document.getElementById('guestRegNameWrapper')?.classList.add('input-error');
+        hasError = true;
+      }
+      if (!email || !emailRegex.test(email)) {
+        document.getElementById('guestRegEmailErrorMsg')?.classList.add('visible');
+        document.getElementById('guestRegEmailWrapper')?.classList.add('input-error');
+        hasError = true;
+      }
+      if (!phone || phone.length < 7) {
+        document.getElementById('guestRegPhoneErrorMsg')?.classList.add('visible');
+        document.getElementById('guestRegPhoneWrapper')?.classList.add('input-error');
+        hasError = true;
+      }
+      if (!password || password.length < 6) {
+        document.getElementById('guestRegPasswordErrorMsg')?.classList.add('visible');
+        document.getElementById('guestRegPasswordWrapper')?.classList.add('input-error');
+        hasError = true;
+      }
+      if (password !== confirmPassword) {
+        document.getElementById('guestRegConfirmPasswordErrorMsg')?.classList.add('visible');
+        document.getElementById('guestRegConfirmPasswordWrapper')?.classList.add('input-error');
+        hasError = true;
+      }
+
+      if (hasError) {
+        soundEngine.playChime('bell');
+        return;
+      }
+
+      const submitBtn = document.getElementById('guestRegSubmitBtn');
+      const btnText = document.getElementById('guestRegBtnText');
+      const spinner = document.getElementById('guestRegSpinner');
+
+      isGuestSubmitting = true;
+      if (submitBtn) submitBtn.disabled = true;
+      if (btnText) btnText.style.display = 'none';
+      if (spinner) spinner.style.display = 'inline-flex';
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/auth/register/guest`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, fullName: name, email, password, confirmPassword, phone, phoneNumber: phone })
+        });
+
+        let data = {};
+        try { data = await response.json(); } catch (_) {}
+
+        if (response.ok) {
+          soundEngine.playChime('success');
+          showToast('Account Created', 'Guest registration successful! You can now log in with your email and password.', 'success');
+          guestRegForm.reset();
+          switchAuthPane('login');
+          setLoginMode('guest');
+          const loginEmail = document.getElementById('loginEmail');
+          if (loginEmail) loginEmail.value = email;
+          const loginPass = document.getElementById('loginPassword');
+          if (loginPass) {
+            loginPass.value = '';
+            loginPass.focus();
+          }
+          showAuthAlert('Guest registration successful! You can now log in with your email and password.', 'success');
+        } else {
+          const errorMsg = data.message || data.error || (data.errors && Array.isArray(data.errors) ? data.errors.join(', ') : null) || 'Guest registration failed. Please verify your details.';
+          showAuthAlert(errorMsg, 'error');
+          soundEngine.playChime('bell');
+        }
+      } catch (err) {
+        console.error('Guest registration error:', err);
+        showAuthAlert('Unable to reach server. Please try again.', 'error');
+        soundEngine.playChime('bell');
+      } finally {
+        isGuestSubmitting = false;
+        if (submitBtn) submitBtn.disabled = false;
+        if (btnText) btnText.style.display = 'inline-flex';
+        if (spinner) spinner.style.display = 'none';
+      }
+    });
+  }
+
+  // 8. Staff Registration Form Submission
+  const staffRegForm = document.getElementById('staffRegisterForm');
+  if (staffRegForm) {
+    ['staffRegName', 'staffRegEmail', 'staffRegPhone', 'staffRegPassword', 'staffRegConfirmPassword'].forEach(id => {
+      document.getElementById(id)?.addEventListener('input', () => {
+        document.getElementById(id + 'ErrorMsg')?.classList.remove('visible');
+        document.getElementById(id + 'Wrapper')?.classList.remove('input-error');
+        document.getElementById('authAlertBanner').style.display = 'none';
+      });
+    });
+
+    let isStaffSubmitting = false;
+    staffRegForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (isStaffSubmitting) return;
+      clearAuthErrors();
+
+      const name = document.getElementById('staffRegName')?.value.trim();
+      const email = document.getElementById('staffRegEmail')?.value.trim();
+      const phone = document.getElementById('staffRegPhone')?.value.trim();
+      const department = document.getElementById('staffRegDepartment')?.value || 'Operations';
+      const password = document.getElementById('staffRegPassword')?.value;
+      const confirmPassword = document.getElementById('staffRegConfirmPassword')?.value;
+
+      let hasError = false;
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+      if (!name) {
+        document.getElementById('staffRegNameErrorMsg')?.classList.add('visible');
+        document.getElementById('staffRegNameWrapper')?.classList.add('input-error');
+        hasError = true;
+      }
+      if (!email || !emailRegex.test(email)) {
+        document.getElementById('staffRegEmailErrorMsg')?.classList.add('visible');
+        document.getElementById('staffRegEmailWrapper')?.classList.add('input-error');
+        hasError = true;
+      }
+      if (!phone || phone.length < 7) {
+        document.getElementById('staffRegPhoneErrorMsg')?.classList.add('visible');
+        document.getElementById('staffRegPhoneWrapper')?.classList.add('input-error');
+        hasError = true;
+      }
+      if (!password || password.length < 6) {
+        document.getElementById('staffRegPasswordErrorMsg')?.classList.add('visible');
+        document.getElementById('staffRegPasswordWrapper')?.classList.add('input-error');
+        hasError = true;
+      }
+      if (password !== confirmPassword) {
+        document.getElementById('staffRegConfirmPasswordErrorMsg')?.classList.add('visible');
+        document.getElementById('staffRegConfirmPasswordWrapper')?.classList.add('input-error');
+        hasError = true;
+      }
+
+      if (hasError) {
+        soundEngine.playChime('bell');
+        return;
+      }
+
+      const submitBtn = document.getElementById('staffRegSubmitBtn');
+      const btnText = document.getElementById('staffRegBtnText');
+      const spinner = document.getElementById('staffRegSpinner');
+
+      isStaffSubmitting = true;
+      if (submitBtn) submitBtn.disabled = true;
+      if (btnText) btnText.style.display = 'none';
+      if (spinner) spinner.style.display = 'inline-flex';
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/auth/register/staff`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, fullName: name, email, password, confirmPassword, phone, phoneNumber: phone, department })
+        });
+
+        let data = {};
+        try { data = await response.json(); } catch (_) {}
+
+        if (response.ok) {
+          soundEngine.playChime('bell');
+          showToast('Staff Application Submitted', 'Staff application submitted successfully! Please wait for admin approval.', 'success');
+          staffRegForm.reset();
+          switchAuthPane('login');
+          setLoginMode('staff');
+          const loginEmail = document.getElementById('loginEmail');
+          if (loginEmail) loginEmail.value = email;
+          const loginPass = document.getElementById('loginPassword');
+          if (loginPass) loginPass.value = '';
+          showAuthAlert('Staff application submitted successfully! Please wait for admin approval.', 'success');
+        } else {
+          const errorMsg = data.message || data.error || (data.errors && Array.isArray(data.errors) ? data.errors.join(', ') : null) || 'Staff application failed. Please verify your details.';
+          showAuthAlert(errorMsg, 'error');
+          soundEngine.playChime('bell');
+        }
+      } catch (err) {
+        console.error('Staff registration error:', err);
+        showAuthAlert('Unable to reach server. Please try again.', 'error');
+        soundEngine.playChime('bell');
+      } finally {
+        isStaffSubmitting = false;
+        if (submitBtn) submitBtn.disabled = false;
+        if (btnText) btnText.style.display = 'inline-flex';
+        if (spinner) spinner.style.display = 'none';
+      }
+    });
+  }
 }
+
+// --- ADMIN STAFF APPLICATIONS & APPROVALS MANAGEMENT ---
+let staffApplicationsList = [];
+let currentStaffFilter = 'ALL';
+let staffSearchQuery = '';
+const processingStaffApplicationIds = new Set();
+
+async function loadStaffApplications(filter = currentStaffFilter) {
+  try {
+    currentStaffFilter = filter;
+    const token = typeof AuthManager !== 'undefined' ? AuthManager.getToken() : null;
+    if (!token) return;
+
+    const res = await fetch(`${API_BASE_URL}/api/admin/staff-applications?_t=${Date.now()}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/json',
+        'Cache-Control': 'no-cache'
+      }
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data)) {
+        staffApplicationsList = data;
+        updateStaffKPIs(data);
+        renderStaffApplications();
+      }
+    } else {
+      console.warn('Failed to load staff applications:', res.status);
+    }
+  } catch (err) {
+    console.error('Error fetching staff applications:', err);
+  }
+}
+window.loadStaffApplications = loadStaffApplications;
+
+function updateStaffKPIs(allApps) {
+  const total = allApps.length;
+  const pending = allApps.filter(a => a.status === 'PENDING').length;
+  const approved = allApps.filter(a => a.status === 'APPROVED').length;
+  const rejected = allApps.filter(a => a.status === 'REJECTED').length;
+
+  const kpiTotal = document.getElementById('staffKpiTotal');
+  const kpiPending = document.getElementById('staffKpiPending');
+  const kpiApproved = document.getElementById('staffKpiApproved');
+  const kpiRejected = document.getElementById('staffKpiRejected');
+
+  if (kpiTotal) kpiTotal.textContent = total;
+  if (kpiPending) kpiPending.textContent = pending;
+  if (kpiApproved) kpiApproved.textContent = approved;
+  if (kpiRejected) kpiRejected.textContent = rejected;
+
+  // Filter button count badges
+  const cAll = document.getElementById('countFilterAll');
+  const cPending = document.getElementById('countFilterPending');
+  const cApproved = document.getElementById('countFilterApproved');
+  const cRejected = document.getElementById('countFilterRejected');
+
+  if (cAll) cAll.textContent = total;
+  if (cPending) cPending.textContent = pending;
+  if (cApproved) cApproved.textContent = approved;
+  if (cRejected) cRejected.textContent = rejected;
+
+  // Notification badges in sidebar and header
+  const navBadge = document.getElementById('navStaffApprovalsBadge');
+  const headerBadge = document.getElementById('staffPendingHeaderBadge');
+
+  if (navBadge) {
+    if (pending > 0) {
+      navBadge.textContent = pending;
+      navBadge.style.display = 'inline-block';
+    } else {
+      navBadge.style.display = 'none';
+    }
+  }
+
+  if (headerBadge) {
+    if (pending > 0) {
+      headerBadge.textContent = `${pending} Pending`;
+      headerBadge.style.display = 'inline-flex';
+    } else {
+      headerBadge.style.display = 'none';
+    }
+  }
+}
+
+function filterStaffApplications(filter) {
+  currentStaffFilter = filter;
+  document.querySelectorAll('.staff-filter-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.filter === filter);
+  });
+  renderStaffApplications();
+}
+window.filterStaffApplications = filterStaffApplications;
+
+function onStaffSearchInput(val) {
+  staffSearchQuery = (val || '').toLowerCase().trim();
+  renderStaffApplications();
+}
+window.onStaffSearchInput = onStaffSearchInput;
+
+function renderStaffApplications() {
+  const tbody = document.getElementById('staffApplicationsTableBody');
+  const emptyState = document.getElementById('staffEmptyState');
+  if (!tbody) return;
+
+  let filtered = staffApplicationsList.slice();
+
+  if (currentStaffFilter && currentStaffFilter !== 'ALL') {
+    filtered = filtered.filter(a => a.status === currentStaffFilter);
+  }
+
+  if (staffSearchQuery) {
+    filtered = filtered.filter(a =>
+      (a.fullName && a.fullName.toLowerCase().includes(staffSearchQuery)) ||
+      (a.email && a.email.toLowerCase().includes(staffSearchQuery)) ||
+      (a.phoneNumber && a.phoneNumber.toLowerCase().includes(staffSearchQuery)) ||
+      (a.department && a.department.toLowerCase().includes(staffSearchQuery))
+    );
+  }
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = '';
+    if (emptyState) emptyState.style.display = 'block';
+    return;
+  }
+
+  if (emptyState) emptyState.style.display = 'none';
+
+  tbody.innerHTML = filtered.map(app => {
+    let statusBadge = '';
+    let actionButtons = '';
+    const isProcessing = processingStaffApplicationIds.has(app.id);
+
+    if (app.status === 'PENDING') {
+      statusBadge = `<span class="booking-status-badge status-pending"><i class="fa-solid fa-clock"></i> PENDING</span>`;
+      actionButtons = `
+        <div class="staff-action-btns" id="staff-actions-${app.id}">
+          <button class="btn-staff-action btn-staff-approve" data-staff-id="${app.id}" ${isProcessing ? 'disabled style="opacity: 0.5; cursor: not-allowed; pointer-events: none;"' : ''} onclick="approveStaffApplication(${app.id}, '${escapeHtml(app.fullName || '')}', this)" title="Grant active staff clearance">
+            ${isProcessing ? '<i class="fa-solid fa-spinner fa-spin"></i> Approving...' : '<i class="fa-solid fa-circle-check"></i> Approve'}
+          </button>
+          <button class="btn-staff-action btn-staff-reject" data-staff-id="${app.id}" ${isProcessing ? 'disabled style="opacity: 0.5; cursor: not-allowed; pointer-events: none;"' : ''} onclick="rejectStaffApplication(${app.id}, '${escapeHtml(app.fullName || '')}', this)" title="Decline staff application">
+            <i class="fa-solid fa-circle-xmark"></i> Reject
+          </button>
+        </div>
+      `;
+    } else if (app.status === 'APPROVED') {
+      statusBadge = `<span class="booking-status-badge status-confirmed"><i class="fa-solid fa-check"></i> APPROVED</span>`;
+      actionButtons = `<span style="color: #22c55e; font-size: 0.85rem; font-weight: 600;"><i class="fa-solid fa-check-double"></i> Active Staff Member</span>`;
+    } else {
+      statusBadge = `<span class="booking-status-badge status-cancelled"><i class="fa-solid fa-ban"></i> REJECTED</span>`;
+      actionButtons = `<span style="color: #ef4444; font-size: 0.85rem; font-weight: 600;"><i class="fa-solid fa-ban"></i> Clearance Denied</span>`;
+    }
+
+    const initials = (app.fullName || 'Staff').split(' ').map(p => p[0]).join('').substring(0, 2).toUpperCase();
+    const createdDate = app.createdAt ? new Date(app.createdAt).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    }) : 'Recent';
+
+    return `
+      <tr>
+        <td>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="width: 32px; height: 32px; border-radius: 50%; background: rgba(212, 175, 55, 0.2); border: 1px solid rgba(212, 175, 55, 0.4); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; color: #d4af37;">
+              ${initials}
+            </div>
+            <div>
+              <div style="font-weight: 600; color: #ffffff;">${escapeHtml(app.fullName || 'N/A')}</div>
+              <div style="font-size: 0.75rem; color: #94a3b8;">ID: #${app.id}</div>
+            </div>
+          </div>
+        </td>
+        <td>
+          <span style="color: #e2e8f0; font-family: monospace; font-size: 0.85rem;">${escapeHtml(app.email || 'N/A')}</span>
+        </td>
+        <td>
+          <span style="color: #cbd5e1;">${escapeHtml(app.phoneNumber || 'N/A')}</span>
+        </td>
+        <td>
+          <span class="hall-tag" style="background: rgba(212, 175, 55, 0.15); border: 1px solid rgba(212, 175, 55, 0.3); color: #d4af37; padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600;">
+            ${escapeHtml(app.department || 'Operations')}
+          </span>
+        </td>
+        <td style="font-size: 0.82rem; color: #94a3b8;">
+          ${createdDate}
+        </td>
+        <td>
+          ${statusBadge}
+        </td>
+        <td style="text-align: right;">
+          ${actionButtons}
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+window.renderStaffApplications = renderStaffApplications;
+
+async function approveStaffApplication(id, name, btnEl) {
+  if (processingStaffApplicationIds.has(id)) return;
+
+  if (!name && Array.isArray(staffApplicationsList)) {
+    const found = staffApplicationsList.find(a => a.id === id);
+    if (found) name = found.fullName || found.email;
+  }
+  const displayName = name || 'Staff Member';
+
+  // Disable relevant actions immediately to prevent duplicate requests
+  processingStaffApplicationIds.add(id);
+  const actionBtns = document.querySelectorAll(`[data-staff-id="${id}"]`);
+  actionBtns.forEach(btn => {
+    btn.disabled = true;
+    btn.style.opacity = '0.5';
+    btn.style.cursor = 'not-allowed';
+    btn.style.pointerEvents = 'none';
+  });
+  const approveBtn = btnEl || document.querySelector(`button.btn-staff-approve[data-staff-id="${id}"]`);
+  if (approveBtn) {
+    approveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Approving...';
+  }
+
+  try {
+    const token = typeof AuthManager !== 'undefined' ? AuthManager.getToken() : null;
+    const res = await fetch(`${API_BASE_URL}/api/admin/staff-applications/${id}/approve`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }
+    });
+
+    let data = {};
+    try { data = await res.json(); } catch (_) {}
+
+    if (res.ok) {
+      // Immediate frontend status update without requiring a page refresh
+      const idx = staffApplicationsList.findIndex(a => a.id === id);
+      if (idx !== -1) {
+        if (data && data.status) {
+          staffApplicationsList[idx] = { ...staffApplicationsList[idx], ...data, status: 'APPROVED' };
+        } else {
+          staffApplicationsList[idx] = { ...staffApplicationsList[idx], status: 'APPROVED' };
+        }
+      }
+      updateStaffKPIs(staffApplicationsList);
+      renderStaffApplications();
+
+      if (typeof soundEngine !== 'undefined') soundEngine.playChime('success');
+      showToast('Staff Clearance Approved', `Staff application for ${displayName} has been approved successfully.`, 'success');
+
+      // Sync backend state in background
+      loadStaffApplications(currentStaffFilter).catch(() => {});
+    } else {
+      const errorMsg = data.message || data.error || 'Unable to approve staff application';
+      showToast('Action Failed', errorMsg, 'error');
+      renderStaffApplications();
+    }
+  } catch (err) {
+    console.error('Error approving staff:', err);
+    showToast('Error', 'Network error while approving staff application', 'error');
+    renderStaffApplications();
+  } finally {
+    processingStaffApplicationIds.delete(id);
+  }
+}
+window.approveStaffApplication = approveStaffApplication;
+
+async function rejectStaffApplication(id, name, btnEl) {
+  if (processingStaffApplicationIds.has(id)) return;
+
+  if (!name && Array.isArray(staffApplicationsList)) {
+    const found = staffApplicationsList.find(a => a.id === id);
+    if (found) name = found.fullName || found.email;
+  }
+  const displayName = name || 'Staff Member';
+
+  // Disable relevant actions immediately to prevent duplicate requests
+  processingStaffApplicationIds.add(id);
+  const actionBtns = document.querySelectorAll(`[data-staff-id="${id}"]`);
+  actionBtns.forEach(btn => {
+    btn.disabled = true;
+    btn.style.opacity = '0.5';
+    btn.style.cursor = 'not-allowed';
+    btn.style.pointerEvents = 'none';
+  });
+  const rejectBtn = btnEl || document.querySelector(`button.btn-staff-reject[data-staff-id="${id}"]`);
+  if (rejectBtn) {
+    rejectBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Rejecting...';
+  }
+
+  try {
+    const token = typeof AuthManager !== 'undefined' ? AuthManager.getToken() : null;
+    const res = await fetch(`${API_BASE_URL}/api/admin/staff-applications/${id}/reject`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }
+    });
+
+    let data = {};
+    try { data = await res.json(); } catch (_) {}
+
+    if (res.ok) {
+      // Immediate frontend status update without requiring a page refresh
+      const idx = staffApplicationsList.findIndex(a => a.id === id);
+      if (idx !== -1) {
+        if (data && data.status) {
+          staffApplicationsList[idx] = { ...staffApplicationsList[idx], ...data, status: 'REJECTED' };
+        } else {
+          staffApplicationsList[idx] = { ...staffApplicationsList[idx], status: 'REJECTED' };
+        }
+      }
+      updateStaffKPIs(staffApplicationsList);
+      renderStaffApplications();
+
+      if (typeof soundEngine !== 'undefined') soundEngine.playChime('bell');
+      showToast('Staff Application Rejected', `Staff application for ${displayName} has been declined.`, 'info');
+
+      // Sync backend state in background
+      loadStaffApplications(currentStaffFilter).catch(() => {});
+    } else {
+      const errorMsg = data.message || data.error || 'Unable to reject staff application';
+      showToast('Action Failed', errorMsg, 'error');
+      renderStaffApplications();
+    }
+  } catch (err) {
+    console.error('Error rejecting staff:', err);
+    showToast('Error', 'Network error while rejecting staff application', 'error');
+    renderStaffApplications();
+  } finally {
+    processingStaffApplicationIds.delete(id);
+  }
+}
+window.rejectStaffApplication = rejectStaffApplication;
 
 // --- APP INITIALIZER ---
 async function initApp() {
@@ -2786,6 +3478,10 @@ function initEventListeners() {
       if (targetId === 'tabReservations') {
         if (typeof renderBookingsByActiveRole === 'function') renderBookingsByActiveRole();
         if (typeof syncBookingsFromBackend === 'function') syncBookingsFromBackend();
+      }
+
+      if (targetId === 'tabStaffApprovals') {
+        if (typeof loadStaffApplications === 'function') loadStaffApplications();
       }
 
       soundEngine.playChime('bell');

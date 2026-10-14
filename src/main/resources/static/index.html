@@ -57,27 +57,6 @@
       <div class="guest-split-form-pane" id="guestSplitFormPane">
         <div class="guest-form-inner">
 
-          <!-- Admin / Staff Mode Bar (Active ONLY in Admin/Staff Mode) -->
-          <div class="auth-admin-mode-bar" id="adminStaffModeBar" style="display: none;">
-            <div class="auth-quick-access">
-              <span class="quick-access-label"><i class="fa-solid fa-wand-magic-sparkles"></i> Select Login Mode:</span>
-              <div class="quick-role-chips">
-                <button type="button" class="role-chip chip-admin" id="chipAdmin" title="Administrator Login">
-                  <i class="fa-solid fa-shield-halved"></i> Admin
-                </button>
-                <button type="button" class="role-chip chip-staff" id="chipStaff" title="Hotel Staff Login">
-                  <i class="fa-solid fa-id-badge"></i> Staff
-                </button>
-                <button type="button" class="role-chip chip-user active" id="chipUser" title="Guest Login">
-                  <i class="fa-solid fa-user"></i> Guest
-                </button>
-              </div>
-            </div>
-            <div class="auth-mode-header">
-              <h2 class="auth-mode-title font-serif" id="authModeTitle">ADMIN LOGIN</h2>
-            </div>
-          </div>
-
           <!-- GUEST BRANDING BLOCK -->
           <div class="guest-brand-block" id="guestBrandBlock">
             <div class="guest-brand-crest">
@@ -88,109 +67,426 @@
             <div class="guest-gold-divider"></div>
           </div>
 
-          <!-- GUEST WELCOME MESSAGE -->
-          <div class="guest-welcome-block" id="guestWelcomeBlock">
-            <div class="guest-mode-indicator">
-              <i class="fa-solid fa-compass"></i>
-              <span>Guest Login</span>
+          <!-- ROLE SELECTOR BAR (Always visible for Admin, Staff, Guest selection) -->
+          <div class="auth-role-selector-bar" id="authRoleSelectorBar">
+            <span class="auth-role-select-title"><i class="fa-solid fa-user-shield"></i> Portal Access Mode:</span>
+            <div class="auth-role-chips-group">
+              <button type="button" class="role-chip chip-admin" id="chipAdmin" onclick="setLoginMode('admin')" title="Executive Administrator Access">
+                <i class="fa-solid fa-shield-halved"></i> Admin
+              </button>
+              <button type="button" class="role-chip chip-staff" id="chipStaff" onclick="setLoginMode('staff')" title="Hotel Operations Staff Access">
+                <i class="fa-solid fa-id-badge"></i> Staff
+              </button>
+              <button type="button" class="role-chip chip-user active" id="chipUser" onclick="setLoginMode('guest')" title="Valued Guest Portal">
+                <i class="fa-solid fa-user"></i> Guest
+              </button>
             </div>
-            <h2 class="guest-welcome-title font-serif">Welcome Back</h2>
-            <p class="guest-welcome-sub">Sign in to continue your journey with Aurelia Grand.</p>
           </div>
 
           <!-- Alert Notification Banner for Error / Status Messages -->
           <div class="auth-alert-banner" id="authAlertBanner" style="display: none;" role="alert">
-            <i class="fa-solid fa-circle-exclamation auth-alert-icon"></i>
+            <i class="fa-solid fa-circle-exclamation auth-alert-icon" id="authAlertIcon"></i>
             <span class="auth-alert-text" id="authAlertText"></span>
           </div>
 
-          <!-- Login Form -->
-          <form class="auth-form guest-login-form" id="loginForm" novalidate>
-            <!-- Email Field -->
-            <div class="form-group auth-form-group">
-              <label for="loginEmail" class="guest-field-label">
-                <span>Email Address</span>
-                <span class="required-star">*</span>
-              </label>
-              <div class="auth-input-wrapper guest-input-wrapper" id="emailInputWrapper">
-                <i class="fa-solid fa-envelope auth-input-icon"></i>
-                <input
-                  type="email"
-                  id="loginEmail"
-                  class="auth-input guest-input-field"
-                  placeholder="Enter your email"
-                  autocomplete="username"
-                  required
-                />
+          <!-- ==================== PANE 1: LOGIN PANE ==================== -->
+          <div class="auth-pane-section" id="loginPaneSection">
+            <!-- GUEST / ROLE WELCOME MESSAGE -->
+            <div class="guest-welcome-block" id="guestWelcomeBlock">
+              <div class="guest-mode-indicator" id="authModeIndicator">
+                <i class="fa-solid fa-compass" id="authModeIcon"></i>
+                <span id="authModeBadgeText">Guest Login</span>
               </div>
-              <span class="field-error-message" id="emailErrorMsg">Please enter a valid email address</span>
+              <h2 class="guest-welcome-title font-serif" id="authWelcomeTitle">Welcome Back</h2>
+              <p class="guest-welcome-sub" id="authWelcomeSub">Sign in to continue your journey with Aurelia Grand.</p>
             </div>
 
-            <!-- Password Field with Show/Hide Toggle -->
-            <div class="form-group auth-form-group">
-              <label for="loginPassword" class="guest-field-label">
-                <span>Password</span>
-                <span class="required-star">*</span>
-              </label>
-              <div class="auth-input-wrapper guest-input-wrapper" id="passwordInputWrapper">
-                <i class="fa-solid fa-lock auth-input-icon"></i>
-                <input
-                  type="password"
-                  id="loginPassword"
-                  class="auth-input guest-input-field"
-                  placeholder="Enter your password"
-                  autocomplete="current-password"
-                  required
-                />
-                <button
-                  type="button"
-                  class="password-toggle-btn"
-                  id="passwordToggleBtn"
-                  title="Show / Hide Password"
-                  aria-label="Toggle password visibility"
-                >
-                  <i class="fa-solid fa-eye" id="passwordToggleIcon"></i>
-                </button>
+            <!-- Login Form -->
+            <form class="auth-form guest-login-form" id="loginForm" novalidate>
+              <!-- Email Field -->
+              <div class="form-group auth-form-group">
+                <label for="loginEmail" class="guest-field-label">
+                  <span id="loginEmailLabel">Email Address</span>
+                  <span class="required-star">*</span>
+                </label>
+                <div class="auth-input-wrapper guest-input-wrapper" id="emailInputWrapper">
+                  <i class="fa-solid fa-envelope auth-input-icon"></i>
+                  <input
+                    type="email"
+                    id="loginEmail"
+                    class="auth-input guest-input-field"
+                    placeholder="Enter your email"
+                    autocomplete="username"
+                    required
+                  />
+                </div>
+                <span class="field-error-message" id="emailErrorMsg">Please enter a valid email address</span>
               </div>
-              <span class="field-error-message" id="passwordErrorMsg">Please enter your password</span>
+
+              <!-- Password Field with Show/Hide Toggle -->
+              <div class="form-group auth-form-group">
+                <label for="loginPassword" class="guest-field-label">
+                  <span>Password</span>
+                  <span class="required-star">*</span>
+                </label>
+                <div class="auth-input-wrapper guest-input-wrapper" id="passwordInputWrapper">
+                  <i class="fa-solid fa-lock auth-input-icon"></i>
+                  <input
+                    type="password"
+                    id="loginPassword"
+                    class="auth-input guest-input-field"
+                    placeholder="Enter your password"
+                    autocomplete="current-password"
+                    required
+                  />
+                  <button
+                    type="button"
+                    class="password-toggle-btn"
+                    id="passwordToggleBtn"
+                    title="Show / Hide Password"
+                    aria-label="Toggle password visibility"
+                  >
+                    <i class="fa-solid fa-eye" id="passwordToggleIcon"></i>
+                  </button>
+                </div>
+                <span class="field-error-message" id="passwordErrorMsg">Please enter your password</span>
+              </div>
+
+              <!-- Remember Me & Forgot Password Row -->
+              <div class="auth-meta-row guest-meta-row">
+                <label class="remember-me-checkbox">
+                  <input type="checkbox" id="rememberMeCheckbox" checked />
+                  <span class="custom-check-mark"><i class="fa-solid fa-check"></i></span>
+                  <span class="remember-me-text">Remember session</span>
+                </label>
+                <a href="#" class="forgot-password-link" id="forgotPasswordLink">Forgot Password?</a>
+              </div>
+
+              <!-- Submit Button with Loading State -->
+              <button type="submit" class="btn-auth-submit guest-btn-submit" id="loginSubmitBtn">
+                <span class="btn-text" id="loginBtnText">
+                  <i class="fa-solid fa-arrow-right-to-bracket"></i> Sign In
+                </span>
+                <span class="btn-spinner" id="loginSpinner" style="display: none;">
+                  <i class="fa-solid fa-circle-notch fa-spin"></i> Signing In...
+                </span>
+              </button>
+            </form>
+
+            <!-- Registration Links Switcher -->
+            <div class="auth-register-switch-strip">
+              <div class="auth-switch-item">
+                <span>New to Aurelia Grand?</span>
+                <a href="#" class="auth-switch-link" id="switchToGuestRegBtn" onclick="switchAuthPane('guest-register'); return false;">
+                  <i class="fa-solid fa-user-plus"></i> Register as Guest
+                </a>
+              </div>
+              <div class="auth-switch-divider">|</div>
+              <div class="auth-switch-item">
+                <span>Hotel Staff Applicant?</span>
+                <a href="#" class="auth-switch-link staff-link-accent" id="switchToStaffRegBtn" onclick="switchAuthPane('staff-register'); return false;">
+                  <i class="fa-solid fa-id-card"></i> Register as Staff
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- ==================== PANE 2: GUEST REGISTRATION ==================== -->
+          <div class="auth-pane-section" id="guestRegisterPaneSection" style="display: none;">
+            <div class="guest-welcome-block">
+              <div class="guest-mode-indicator">
+                <i class="fa-solid fa-user-plus"></i>
+                <span>Guest Sanctuary Registration</span>
+              </div>
+              <h2 class="guest-welcome-title font-serif">Create Guest Account</h2>
+              <p class="guest-welcome-sub">Join Aurelia Grand to unlock bespoke luxury stays, suites, and private dining.</p>
             </div>
 
-            <!-- Remember Me & Forgot Password Row -->
-            <div class="auth-meta-row guest-meta-row">
-              <label class="remember-me-checkbox">
-                <input type="checkbox" id="rememberMeCheckbox" checked />
-                <span class="custom-check-mark"><i class="fa-solid fa-check"></i></span>
-                <span class="remember-me-text">Remember authentication session</span>
-              </label>
-              <a href="#" class="forgot-password-link" id="forgotPasswordLink">Forgot Password?</a>
+            <form class="auth-form guest-login-form" id="guestRegisterForm" novalidate>
+              <!-- Full Name -->
+              <div class="form-group auth-form-group">
+                <label for="guestRegName" class="guest-field-label">
+                  <span>Full Legal Name</span>
+                  <span class="required-star">*</span>
+                </label>
+                <div class="auth-input-wrapper guest-input-wrapper" id="guestRegNameWrapper">
+                  <i class="fa-solid fa-user auth-input-icon"></i>
+                  <input
+                    type="text"
+                    id="guestRegName"
+                    class="auth-input guest-input-field"
+                    placeholder="e.g. Countess Eleanor Vance"
+                    required
+                  />
+                </div>
+                <span class="field-error-message" id="guestRegNameErrorMsg">Full name is required</span>
+              </div>
+
+              <!-- Email -->
+              <div class="form-group auth-form-group">
+                <label for="guestRegEmail" class="guest-field-label">
+                  <span>Email Address</span>
+                  <span class="required-star">*</span>
+                </label>
+                <div class="auth-input-wrapper guest-input-wrapper" id="guestRegEmailWrapper">
+                  <i class="fa-solid fa-envelope auth-input-icon"></i>
+                  <input
+                    type="email"
+                    id="guestRegEmail"
+                    class="auth-input guest-input-field"
+                    placeholder="e.g. eleanor.vance@example.com"
+                    required
+                  />
+                </div>
+                <span class="field-error-message" id="guestRegEmailErrorMsg">Please enter a valid email address</span>
+              </div>
+
+              <!-- Phone -->
+              <div class="form-group auth-form-group">
+                <label for="guestRegPhone" class="guest-field-label">
+                  <span>Contact Phone Number</span>
+                  <span class="required-star">*</span>
+                </label>
+                <div class="auth-input-wrapper guest-input-wrapper" id="guestRegPhoneWrapper">
+                  <i class="fa-solid fa-phone auth-input-icon"></i>
+                  <input
+                    type="tel"
+                    id="guestRegPhone"
+                    class="auth-input guest-input-field"
+                    placeholder="e.g. +91 98765 43210"
+                    required
+                  />
+                </div>
+                <span class="field-error-message" id="guestRegPhoneErrorMsg">Phone number is required</span>
+              </div>
+
+              <!-- Password -->
+              <div class="form-group auth-form-group">
+                <label for="guestRegPassword" class="guest-field-label">
+                  <span>Create Password (Min 6 Characters)</span>
+                  <span class="required-star">*</span>
+                </label>
+                <div class="auth-input-wrapper guest-input-wrapper" id="guestRegPasswordWrapper">
+                  <i class="fa-solid fa-lock auth-input-icon"></i>
+                  <input
+                    type="password"
+                    id="guestRegPassword"
+                    class="auth-input guest-input-field"
+                    placeholder="Create a strong password"
+                    required
+                  />
+                  <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('guestRegPassword', this)">
+                    <i class="fa-solid fa-eye"></i>
+                  </button>
+                </div>
+                <span class="field-error-message" id="guestRegPasswordErrorMsg">Password must be at least 6 characters</span>
+              </div>
+
+              <!-- Confirm Password -->
+              <div class="form-group auth-form-group">
+                <label for="guestRegConfirmPassword" class="guest-field-label">
+                  <span>Confirm Password</span>
+                  <span class="required-star">*</span>
+                </label>
+                <div class="auth-input-wrapper guest-input-wrapper" id="guestRegConfirmPasswordWrapper">
+                  <i class="fa-solid fa-shield-halved auth-input-icon"></i>
+                  <input
+                    type="password"
+                    id="guestRegConfirmPassword"
+                    class="auth-input guest-input-field"
+                    placeholder="Re-enter password"
+                    required
+                  />
+                  <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('guestRegConfirmPassword', this)">
+                    <i class="fa-solid fa-eye"></i>
+                  </button>
+                </div>
+                <span class="field-error-message" id="guestRegConfirmPasswordErrorMsg">Passwords must match</span>
+              </div>
+
+              <!-- Submit Button -->
+              <button type="submit" class="btn-auth-submit guest-btn-submit" id="guestRegSubmitBtn">
+                <span class="btn-text" id="guestRegBtnText">
+                  <i class="fa-solid fa-user-check"></i> Complete Guest Registration
+                </span>
+                <span class="btn-spinner" id="guestRegSpinner" style="display: none;">
+                  <i class="fa-solid fa-circle-notch fa-spin"></i> Creating Account...
+                </span>
+              </button>
+            </form>
+
+            <div class="auth-pane-back-link">
+              <span>Already registered?</span>
+              <a href="#" onclick="switchAuthPane('login'); return false;">
+                <i class="fa-solid fa-arrow-left"></i> Return to Sign In
+              </a>
+            </div>
+          </div>
+
+          <!-- ==================== PANE 3: STAFF REGISTRATION (WITH ADMIN APPROVAL NOTICE) ==================== -->
+          <div class="auth-pane-section" id="staffRegisterPaneSection" style="display: none;">
+            <div class="guest-welcome-block">
+              <div class="guest-mode-indicator" style="background: rgba(234, 179, 8, 0.15); border-color: rgba(234, 179, 8, 0.4); color: #fde047;">
+                <i class="fa-solid fa-id-badge"></i>
+                <span>Hotel Staff Registration</span>
+              </div>
+              <h2 class="guest-welcome-title font-serif">Apply for Staff Credentials</h2>
+              <p class="guest-welcome-sub">Submit your staff details. Applications are placed in PENDING status pending executive administrator approval.</p>
             </div>
 
-            <!-- Submit Button with Loading State -->
-            <button type="submit" class="btn-auth-submit guest-btn-submit" id="loginSubmitBtn">
-              <span class="btn-text" id="loginBtnText">
-                <i class="fa-solid fa-arrow-right-to-bracket"></i> Sign In
-              </span>
-              <span class="btn-spinner" id="loginSpinner" style="display: none;">
-                <i class="fa-solid fa-circle-notch fa-spin"></i> Signing In...
-              </span>
-            </button>
-          </form>
+            <!-- Administrative Approval Notice Banner -->
+            <div class="staff-approval-notice-card">
+              <i class="fa-solid fa-circle-info"></i>
+              <div>
+                <strong>Executive Approval Required:</strong>
+                <p>New staff accounts will not be able to log in until an authorized Hotel Administrator verifies and approves the application.</p>
+              </div>
+            </div>
 
-          <!-- Security & Subtle Management Portal Switch -->
+            <form class="auth-form guest-login-form" id="staffRegisterForm" novalidate>
+              <!-- Full Name -->
+              <div class="form-group auth-form-group">
+                <label for="staffRegName" class="guest-field-label">
+                  <span>Full Legal Name</span>
+                  <span class="required-star">*</span>
+                </label>
+                <div class="auth-input-wrapper guest-input-wrapper" id="staffRegNameWrapper">
+                  <i class="fa-solid fa-user auth-input-icon"></i>
+                  <input
+                    type="text"
+                    id="staffRegName"
+                    class="auth-input guest-input-field"
+                    placeholder="e.g. Marco Bellini"
+                    required
+                  />
+                </div>
+                <span class="field-error-message" id="staffRegNameErrorMsg">Full name is required</span>
+              </div>
+
+              <!-- Email -->
+              <div class="form-group auth-form-group">
+                <label for="staffRegEmail" class="guest-field-label">
+                  <span>Work / Personal Email</span>
+                  <span class="required-star">*</span>
+                </label>
+                <div class="auth-input-wrapper guest-input-wrapper" id="staffRegEmailWrapper">
+                  <i class="fa-solid fa-envelope auth-input-icon"></i>
+                  <input
+                    type="email"
+                    id="staffRegEmail"
+                    class="auth-input guest-input-field"
+                    placeholder="e.g. marco.bellini@aureliagrand.com"
+                    required
+                  />
+                </div>
+                <span class="field-error-message" id="staffRegEmailErrorMsg">Please enter a valid email address</span>
+              </div>
+
+              <!-- Phone -->
+              <div class="form-group auth-form-group">
+                <label for="staffRegPhone" class="guest-field-label">
+                  <span>Contact Phone Number</span>
+                  <span class="required-star">*</span>
+                </label>
+                <div class="auth-input-wrapper guest-input-wrapper" id="staffRegPhoneWrapper">
+                  <i class="fa-solid fa-phone auth-input-icon"></i>
+                  <input
+                    type="tel"
+                    id="staffRegPhone"
+                    class="auth-input guest-input-field"
+                    placeholder="e.g. +91 98765 00099"
+                    required
+                  />
+                </div>
+                <span class="field-error-message" id="staffRegPhoneErrorMsg">Phone number is required</span>
+              </div>
+
+              <!-- Department Selection -->
+              <div class="form-group auth-form-group">
+                <label for="staffRegDepartment" class="guest-field-label">
+                  <span>Operational Department</span>
+                  <span class="required-star">*</span>
+                </label>
+                <div class="auth-input-wrapper guest-input-wrapper" id="staffRegDeptWrapper">
+                  <i class="fa-solid fa-building auth-input-icon"></i>
+                  <select id="staffRegDepartment" class="auth-input guest-input-field auth-select-field">
+                    <option value="Front Desk & Concierge">Front Desk & Concierge</option>
+                    <option value="Suites & Housekeeping">Suites & Housekeeping</option>
+                    <option value="Food & Beverage / Michelin Cellar">Food & Beverage / Michelin Cellar</option>
+                    <option value="Banquets & Event Operations">Banquets & Event Operations</option>
+                    <option value="Guest Relations & Security">Guest Relations & Security</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Password -->
+              <div class="form-group auth-form-group">
+                <label for="staffRegPassword" class="guest-field-label">
+                  <span>Password (Min 6 Characters)</span>
+                  <span class="required-star">*</span>
+                </label>
+                <div class="auth-input-wrapper guest-input-wrapper" id="staffRegPasswordWrapper">
+                  <i class="fa-solid fa-lock auth-input-icon"></i>
+                  <input
+                    type="password"
+                    id="staffRegPassword"
+                    class="auth-input guest-input-field"
+                    placeholder="Create security password"
+                    required
+                  />
+                  <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('staffRegPassword', this)">
+                    <i class="fa-solid fa-eye"></i>
+                  </button>
+                </div>
+                <span class="field-error-message" id="staffRegPasswordErrorMsg">Password must be at least 6 characters</span>
+              </div>
+
+              <!-- Confirm Password -->
+              <div class="form-group auth-form-group">
+                <label for="staffRegConfirmPassword" class="guest-field-label">
+                  <span>Confirm Password</span>
+                  <span class="required-star">*</span>
+                </label>
+                <div class="auth-input-wrapper guest-input-wrapper" id="staffRegConfirmPasswordWrapper">
+                  <i class="fa-solid fa-shield-halved auth-input-icon"></i>
+                  <input
+                    type="password"
+                    id="staffRegConfirmPassword"
+                    class="auth-input guest-input-field"
+                    placeholder="Re-enter password"
+                    required
+                  />
+                  <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('staffRegConfirmPassword', this)">
+                    <i class="fa-solid fa-eye"></i>
+                  </button>
+                </div>
+                <span class="field-error-message" id="staffRegConfirmPasswordErrorMsg">Passwords must match</span>
+              </div>
+
+              <!-- Submit Button -->
+              <button type="submit" class="btn-auth-submit guest-btn-submit staff-btn-submit" id="staffRegSubmitBtn">
+                <span class="btn-text" id="staffRegBtnText">
+                  <i class="fa-solid fa-paper-plane"></i> Submit Staff Application
+                </span>
+                <span class="btn-spinner" id="staffRegSpinner" style="display: none;">
+                  <i class="fa-solid fa-circle-notch fa-spin"></i> Submitting Application...
+                </span>
+              </button>
+            </form>
+
+            <div class="auth-pane-back-link">
+              <span>Already registered?</span>
+              <a href="#" onclick="switchAuthPane('login'); return false;">
+                <i class="fa-solid fa-arrow-left"></i> Return to Sign In
+              </a>
+            </div>
+          </div>
+
+          <!-- Security Footnote -->
           <div class="guest-footer-block">
             <div class="guest-security-note">
               <i class="fa-solid fa-shield-halved"></i>
-              <span>256-Bit Encrypted TLS &bull; Authenticated Guest Sanctuary</span>
-            </div>
-            <div class="guest-staff-access" id="guestStaffAccessLink">
-              <a href="#" onclick="setLoginMode('admin'); return false;">
-                <i class="fa-solid fa-id-badge"></i> Staff & Management Access
-              </a>
-            </div>
-            <div class="admin-return-guest" id="adminReturnGuestLink" style="display: none;">
-              <a href="#" onclick="setLoginMode('guest'); return false;">
-                <i class="fa-solid fa-arrow-left"></i> Return to Guest Portal
-              </a>
+              <span>256-Bit Encrypted TLS &bull; Authenticated Hospitality Sanctuary</span>
             </div>
           </div>
 
@@ -232,6 +528,11 @@
         <a href="#analytics" class="nav-item" data-target="tabAnalytics" id="navAnalytics">
           <i class="fa-solid fa-arrow-trend-up"></i>
           <span>Financial Analytics</span>
+        </a>
+        <a href="#staff-approvals" class="nav-item" data-target="tabStaffApprovals" id="navStaffApprovals" style="display: none;">
+          <i class="fa-solid fa-user-shield"></i>
+          <span>Staff Approvals</span>
+          <span class="nav-badge" id="navStaffApprovalsBadge" style="display: none; background: #eab308; color: #0b0f17;">0</span>
         </a>
 
         <div class="nav-section-title" id="navSectionTitleServices">Guest Services</div>
@@ -590,6 +891,10 @@
           <button class="tab-btn" data-target="tabAnalytics" id="tabBtnAnalytics">
             <i class="fa-solid fa-magnifying-glass-chart"></i>
             <span>Yield & Department Performance</span>
+          </button>
+          <button class="tab-btn" data-target="tabStaffApprovals" id="tabBtnStaffApprovals" style="display: none;">
+            <i class="fa-solid fa-user-shield"></i>
+            <span>Staff Approvals</span>
           </button>
           <button class="tab-btn" data-target="tabConcierge" id="tabBtnConcierge">
             <i class="fa-solid fa-bell-concierge"></i>
@@ -1435,6 +1740,98 @@
                   <span style="font-size: 0.75rem; color: var(--text-secondary);">Ultra-Bespoke Service</span>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ==================== TAB: STAFF APPROVALS (ADMIN ONLY) ==================== -->
+        <div class="tab-pane" id="tabStaffApprovals">
+          <div class="content-card" style="margin-bottom: 24px;">
+            <div class="card-header-flex">
+              <div class="card-title-group">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <h3 class="font-serif">Executive Staff Applications & Approvals</h3>
+                  <span class="booking-status-badge status-pending" id="staffPendingHeaderBadge" style="display: none;">0 Pending</span>
+                </div>
+                <p>Review new staff registration applications, inspect credentials, and grant operational system clearances.</p>
+              </div>
+              <div style="display: flex; gap: 10px; align-items: center;">
+                <button class="btn-refresh-luxury" onclick="loadStaffApplications(currentStaffFilter); showToast('Registry Updated', 'Staff applications list synchronized', 'info');" title="Refresh Application List">
+                  <i class="fa-solid fa-rotate"></i> Refresh
+                </button>
+              </div>
+            </div>
+
+            <!-- KPI Summary Bar -->
+            <div class="staff-approvals-kpi-row">
+              <div class="staff-approval-kpi-card">
+                <span class="kpi-label">Total Applications</span>
+                <div class="kpi-val" id="staffKpiTotal">0</div>
+                <span class="kpi-sub">Registered Staff Candidates</span>
+              </div>
+              <div class="staff-approval-kpi-card card-pending-glow">
+                <span class="kpi-label"><i class="fa-solid fa-clock-rotate-left"></i> Awaiting Review</span>
+                <div class="kpi-val text-warning" id="staffKpiPending">0</div>
+                <span class="kpi-sub">Pending Executive Decision</span>
+              </div>
+              <div class="staff-approval-kpi-card">
+                <span class="kpi-label"><i class="fa-solid fa-circle-check"></i> Approved & Active</span>
+                <div class="kpi-val text-success" id="staffKpiApproved">0</div>
+                <span class="kpi-sub">Operational Clearances</span>
+              </div>
+              <div class="staff-approval-kpi-card">
+                <span class="kpi-label"><i class="fa-solid fa-circle-xmark"></i> Rejected</span>
+                <div class="kpi-val text-danger" id="staffKpiRejected">0</div>
+                <span class="kpi-sub">Declined Candidate Files</span>
+              </div>
+            </div>
+
+            <!-- Status Filter Bar -->
+            <div class="staff-filter-bar">
+              <div class="staff-filter-pills">
+                <button type="button" class="staff-filter-btn active" data-filter="ALL" onclick="filterStaffApplications('ALL')">
+                  All Records (<span id="countFilterAll">0</span>)
+                </button>
+                <button type="button" class="staff-filter-btn" data-filter="PENDING" onclick="filterStaffApplications('PENDING')">
+                  Pending Review (<span id="countFilterPending">0</span>)
+                </button>
+                <button type="button" class="staff-filter-btn" data-filter="APPROVED" onclick="filterStaffApplications('APPROVED')">
+                  Approved (<span id="countFilterApproved">0</span>)
+                </button>
+                <button type="button" class="staff-filter-btn" data-filter="REJECTED" onclick="filterStaffApplications('REJECTED')">
+                  Rejected (<span id="countFilterRejected">0</span>)
+                </button>
+              </div>
+              <div class="staff-search-box">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="staffAppSearchInput" placeholder="Filter by applicant name or email..." oninput="onStaffSearchInput(this.value)" />
+              </div>
+            </div>
+
+            <!-- Applications Table -->
+            <div class="table-responsive" style="margin-top: 16px;">
+              <table class="luxury-data-table staff-applications-table">
+                <thead>
+                  <tr>
+                    <th>Applicant Name</th>
+                    <th>Email Address</th>
+                    <th>Contact Phone</th>
+                    <th>Department</th>
+                    <th>Application Date</th>
+                    <th>Clearance Status</th>
+                    <th style="text-align: right;">Executive Action</th>
+                  </tr>
+                </thead>
+                <tbody id="staffApplicationsTableBody">
+                  <!-- Populated dynamically by app.js -->
+                </tbody>
+              </table>
+            </div>
+
+            <div id="staffEmptyState" class="staff-empty-state" style="display: none;">
+              <i class="fa-solid fa-clipboard-check"></i>
+              <h4>No Staff Applications Found</h4>
+              <p>There are currently no staff registrations matching this filter.</p>
             </div>
           </div>
         </div>

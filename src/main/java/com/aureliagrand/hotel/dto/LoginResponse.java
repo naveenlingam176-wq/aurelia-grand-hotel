@@ -36,6 +36,9 @@ public class LoginResponse {
     @Schema(description = "Preferred currency code", example = "INR")
     private String currency;
 
+    @Schema(description = "Account approval status", example = "APPROVED")
+    private String status = "APPROVED";
+
     @Schema(description = "Nested user profile DTO")
     private UserDto user;
 
@@ -54,6 +57,7 @@ public class LoginResponse {
             this.role = userEntity.getRole() != null ? userEntity.getRole().name() : "GUEST";
             this.country = userEntity.getCountry();
             this.currency = userEntity.getCurrency();
+            this.status = userEntity.getStatus() != null ? userEntity.getStatus().name() : "APPROVED";
             this.user = new UserDto(userEntity);
         }
     }
@@ -138,6 +142,14 @@ public class LoginResponse {
 
     public void setCurrency(String currency) {
         this.currency = currency;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     public UserDto getUser() {

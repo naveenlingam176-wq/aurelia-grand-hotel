@@ -46,12 +46,42 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(AccountPendingException.class)
+    public ResponseEntity<Map<String, Object>> handleAccountPending(AccountPendingException ex) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("status", HttpStatus.FORBIDDEN.value());
+        body.put("success", false);
+        body.put("message", ex.getMessage());
+        body.put("timestamp", Instant.now().toString());
+        return new ResponseEntity<>(body, HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(AccountRejectedException.class)
+    public ResponseEntity<Map<String, Object>> handleAccountRejected(AccountRejectedException ex) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("status", HttpStatus.FORBIDDEN.value());
+        body.put("success", false);
+        body.put("message", ex.getMessage());
+        body.put("timestamp", Instant.now().toString());
+        return new ResponseEntity<>(body, HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(org.springframework.security.authentication.DisabledException.class)
+    public ResponseEntity<Map<String, Object>> handleDisabled(org.springframework.security.authentication.DisabledException ex) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("status", HttpStatus.FORBIDDEN.value());
+        body.put("success", false);
+        body.put("message", "Account is disabled or pending review. Please contact hotel management.");
+        body.put("timestamp", Instant.now().toString());
+        return new ResponseEntity<>(body, HttpStatus.FORBIDDEN);
+    }
+
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<Map<String, Object>> handleBadCredentials(BadCredentialsException ex) {
         Map<String, Object> body = new HashMap<>();
         body.put("status", HttpStatus.UNAUTHORIZED.value());
         body.put("success", false);
-        body.put("message", "Invalid email or password");
+        body.put("message", (ex.getMessage() != null && !ex.getMessage().isBlank()) ? ex.getMessage() : "Invalid email or password");
         body.put("timestamp", Instant.now().toString());
         return new ResponseEntity<>(body, HttpStatus.UNAUTHORIZED);
     }

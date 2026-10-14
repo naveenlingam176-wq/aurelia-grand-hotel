@@ -40,6 +40,10 @@ public class User {
     @Column(nullable = false)
     private Boolean active = true;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", length = 20)
+    private AccountStatus status = AccountStatus.APPROVED;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -50,6 +54,10 @@ public class User {
     }
 
     public User(Long id, String name, String email, String password, String phone, Role role, String country, String currency, Boolean active) {
+        this(id, name, email, password, phone, role, country, currency, active, AccountStatus.APPROVED);
+    }
+
+    public User(Long id, String name, String email, String password, String phone, Role role, String country, String currency, Boolean active, AccountStatus status) {
         this.id = id;
         this.name = name;
         this.email = email;
@@ -59,6 +67,7 @@ public class User {
         this.country = country;
         this.currency = currency;
         this.active = active;
+        this.status = status != null ? status : AccountStatus.APPROVED;
     }
 
     @PrePersist
@@ -67,6 +76,9 @@ public class User {
         this.updatedAt = LocalDateTime.now();
         if (this.active == null) {
             this.active = true;
+        }
+        if (this.status == null) {
+            this.status = AccountStatus.APPROVED;
         }
     }
 
@@ -154,6 +166,14 @@ public class User {
 
     public void setActive(Boolean active) {
         this.active = active;
+    }
+
+    public AccountStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(AccountStatus status) {
+        this.status = status;
     }
 
     public LocalDateTime getCreatedAt() {

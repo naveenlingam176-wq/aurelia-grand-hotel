@@ -58,7 +58,13 @@ public class DataSeeder implements CommandLineRunner {
     }
 
     private void seedUsers() {
-        if (userRepository.findByEmailIgnoreCase("admin@aureliagrand.com").isEmpty()) {
+        userRepository.findByEmailIgnoreCase("admin@aureliagrand.com").ifPresentOrElse(admin -> {
+            if (admin.getStatus() == null || admin.getStatus() != AccountStatus.APPROVED || !Boolean.TRUE.equals(admin.getActive())) {
+                admin.setStatus(AccountStatus.APPROVED);
+                admin.setActive(true);
+                userRepository.save(admin);
+            }
+        }, () -> {
             User admin = new User();
             admin.setName("Julian Vance");
             admin.setEmail("admin@aureliagrand.com");
@@ -67,11 +73,18 @@ public class DataSeeder implements CommandLineRunner {
             admin.setRole(Role.ADMIN);
             admin.setCountry("United States");
             admin.setCurrency("USD");
+            admin.setStatus(AccountStatus.APPROVED);
             admin.setActive(true);
             userRepository.save(admin);
-        }
+        });
 
-        if (userRepository.findByEmailIgnoreCase("staff@aureliagrand.com").isEmpty()) {
+        userRepository.findByEmailIgnoreCase("staff@aureliagrand.com").ifPresentOrElse(staff -> {
+            if (staff.getStatus() == null || staff.getStatus() != AccountStatus.APPROVED || !Boolean.TRUE.equals(staff.getActive())) {
+                staff.setStatus(AccountStatus.APPROVED);
+                staff.setActive(true);
+                userRepository.save(staff);
+            }
+        }, () -> {
             User staff = new User();
             staff.setName("Elena Rostova");
             staff.setEmail("staff@aureliagrand.com");
@@ -80,11 +93,18 @@ public class DataSeeder implements CommandLineRunner {
             staff.setRole(Role.STAFF);
             staff.setCountry("Japan");
             staff.setCurrency("JPY");
+            staff.setStatus(AccountStatus.APPROVED);
             staff.setActive(true);
             userRepository.save(staff);
-        }
+        });
 
-        if (userRepository.findByEmailIgnoreCase("user@aureliagrand.com").isEmpty()) {
+        userRepository.findByEmailIgnoreCase("user@aureliagrand.com").ifPresentOrElse(guest -> {
+            if (guest.getStatus() == null || guest.getStatus() != AccountStatus.APPROVED || !Boolean.TRUE.equals(guest.getActive())) {
+                guest.setStatus(AccountStatus.APPROVED);
+                guest.setActive(true);
+                userRepository.save(guest);
+            }
+        }, () -> {
             User guest = new User();
             guest.setName("Lady Genevieve & Lord Sterling");
             guest.setEmail("user@aureliagrand.com");
@@ -93,11 +113,18 @@ public class DataSeeder implements CommandLineRunner {
             guest.setRole(Role.GUEST);
             guest.setCountry("United Kingdom");
             guest.setCurrency("GBP");
+            guest.setStatus(AccountStatus.APPROVED);
             guest.setActive(true);
             userRepository.save(guest);
-        }
+        });
 
-        if (userRepository.findByEmailIgnoreCase("guest@aureliagrand.com").isEmpty()) {
+        userRepository.findByEmailIgnoreCase("guest@aureliagrand.com").ifPresentOrElse(guest2 -> {
+            if (guest2.getStatus() == null || guest2.getStatus() != AccountStatus.APPROVED || !Boolean.TRUE.equals(guest2.getActive())) {
+                guest2.setStatus(AccountStatus.APPROVED);
+                guest2.setActive(true);
+                userRepository.save(guest2);
+            }
+        }, () -> {
             User guest2 = new User();
             guest2.setName("Lord Arthur Wellington");
             guest2.setEmail("guest@aureliagrand.com");
@@ -106,9 +133,10 @@ public class DataSeeder implements CommandLineRunner {
             guest2.setRole(Role.GUEST);
             guest2.setCountry("India");
             guest2.setCurrency("INR");
+            guest2.setStatus(AccountStatus.APPROVED);
             guest2.setActive(true);
             userRepository.save(guest2);
-        }
+        });
     }
 
     private void seedRooms() {

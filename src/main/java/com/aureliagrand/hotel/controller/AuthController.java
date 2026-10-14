@@ -54,6 +54,48 @@ public class AuthController {
     }
 
     @Operation(
+            summary = "Register New Guest Account",
+            description = "Register a new guest with email, password, phone, and optional region preferences. Server assigns GUEST role. **Access: Public**",
+            security = {}
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Guest successfully registered",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserDto.class))),
+            @ApiResponse(responseCode = "400", description = "Validation failure or password mismatch",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "409", description = "Conflict: Email address is already registered",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error occurred",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    @PostMapping("/auth/register/guest")
+    public ResponseEntity<UserDto> registerGuest(@Valid @RequestBody com.aureliagrand.hotel.dto.GuestRegisterRequest request) {
+        UserDto response = authService.registerGuest(request);
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(
+            summary = "Submit Staff Registration Application",
+            description = "Register a new staff account applicant. The account is set to PENDING status and requires administrative approval before activation. **Access: Public**",
+            security = {}
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Staff application successfully submitted in PENDING status",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserDto.class))),
+            @ApiResponse(responseCode = "400", description = "Validation failure or password mismatch",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "409", description = "Conflict: Email address is already registered",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error occurred",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    @PostMapping("/auth/register/staff")
+    public ResponseEntity<UserDto> registerStaff(@Valid @RequestBody com.aureliagrand.hotel.dto.StaffRegisterRequest request) {
+        UserDto response = authService.registerStaff(request);
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(
             summary = "Register New User Account",
             description = "Register a new guest or staff user with email, password, contact, and country preferences. **Access: Public**",
             security = {}

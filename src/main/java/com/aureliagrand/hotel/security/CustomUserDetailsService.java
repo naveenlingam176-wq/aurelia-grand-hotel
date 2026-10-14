@@ -31,13 +31,17 @@ public class CustomUserDetailsService implements UserDetailsService {
             authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
         }
 
+        boolean isApproved = user.getStatus() == null || user.getStatus() == com.aureliagrand.hotel.entity.AccountStatus.APPROVED;
+        boolean isEnabled = Boolean.TRUE.equals(user.getActive()) && isApproved;
+        boolean isNonLocked = user.getStatus() != com.aureliagrand.hotel.entity.AccountStatus.REJECTED;
+
         return new org.springframework.security.core.userdetails.User(
                 user.getEmail(),
                 user.getPassword(),
-                user.getActive() != null ? user.getActive() : true,
+                isEnabled,
                 true,
                 true,
-                true,
+                isNonLocked,
                 authorities
         );
     }
