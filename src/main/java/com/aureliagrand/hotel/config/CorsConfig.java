@@ -18,6 +18,7 @@ public class CorsConfig {
         CorsConfiguration config = new CorsConfiguration();
 
         // Allow frontend development origins
+
         config.setAllowedOrigins(Arrays.asList(
                 "http://localhost:5000",
                 "http://127.0.0.1:5000",
@@ -26,11 +27,12 @@ public class CorsConfig {
                 "http://localhost:3000",
                 "http://127.0.0.1:3000",
                 "http://localhost:5173",
-                "http://127.0.0.1:5173"
-        ));
+                "http://127.0.0.1:5173",
+                "https://aurelia-grand-hotel-production.up.railway.app"));
 
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-        config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept", "X-Requested-With", "Origin"));
+        config.setAllowedHeaders(
+                Arrays.asList("Authorization", "Content-Type", "Accept", "X-Requested-With", "Origin"));
         config.setExposedHeaders(List.of("Authorization"));
         config.setAllowCredentials(true);
         config.setMaxAge(3600L);
